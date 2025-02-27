@@ -20,11 +20,17 @@ local function fly(character)
         local camera = game.Workspace.CurrentCamera
         local direction = Vector3.new(0, 0, 0) -- Đứng yên mặc định
         if humanoid.MoveDirection.Magnitude > 0 then
-            -- Di chuyển theo hướng camera khi có input
-            direction = camera.CFrame:VectorToWorldSpace(humanoid.MoveDirection) * speed
+            -- Điều chỉnh hướng di chuyển dựa trên camera
+            local moveDir = humanoid.MoveDirection
+            local forward = camera.CFrame.LookVector -- Hướng nhìn thẳng của camera
+            local right = camera.CFrame.RightVector -- Hướng bên phải của camera
+            -- Tính toán hướng di chuyển đúng
+            direction = (forward * moveDir.Z + right * moveDir.X) * speed
+            -- moveDir.Z là tiến/lùi, moveDir.X là trái/phải
+            direction = Vector3.new(direction.X, 0, direction.Z).Unit * speed -- Loại bỏ trục Y để không bay lên/xuống
         end
         bodyVelocity.Velocity = direction
-        -- Nhân vật xoay theo hướng camera (trục X)
+        -- Nhân vật xoay theo hướng camera
         bodyGyro.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
         wait()
     end
@@ -41,7 +47,7 @@ local function createGUI()
 
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(0, 150, 0, 150)
-    Frame.Position = UDim2.new(0, 10, 0, 10) -- Đặt ở góc trên bên trái
+    Frame.Position = UDim2.new(0, 10, 0, 10)
     Frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
     Frame.Parent = ScreenGui
     Frame.Active = true
@@ -146,4 +152,4 @@ end
 
 createGUI()
 player.CharacterAdded:Connect(onCharacterAdded)
-print("BGrok3 flight script loaded with camera-aligned rotation!")
+print("BGrok3 flight script loaded with fixed movement!")
