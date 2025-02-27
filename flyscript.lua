@@ -1,7 +1,6 @@
 local player = game.Players.LocalPlayer
 local flying = false
 local speed = 50 -- Tốc độ mặc định
-local UserInputService = game:GetService("UserInputService")
 
 local function fly(character)
     local humanoid = character:WaitForChild("Humanoid")
@@ -17,9 +16,6 @@ local function fly(character)
     bodyGyro.MaxTorque = Vector3.new(40000, 40000, 40000)
     bodyGyro.Parent = rootPart
 
-    -- Bật Shift Lock khi bay
-    UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-
     while flying and character.Parent do
         local camera = game.Workspace.CurrentCamera
         local direction = Vector3.new(0, 0, 0) -- Đứng yên mặc định
@@ -28,12 +24,11 @@ local function fly(character)
             direction = camera.CFrame:VectorToWorldSpace(humanoid.MoveDirection) * speed
         end
         bodyVelocity.Velocity = direction
-        bodyGyro.CFrame = camera.CFrame -- Giữ hướng nhìn theo camera
+        -- Nhân vật xoay theo hướng camera (trục X)
+        bodyGyro.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camera.CFrame.LookVector)
         wait()
     end
 
-    -- Tắt Shift Lock khi ngừng bay
-    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
     bodyVelocity:Destroy()
     bodyGyro:Destroy()
 end
@@ -44,10 +39,9 @@ local function createGUI()
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     ScreenGui.ResetOnSpawn = false
 
-    -- Thu nhỏ hub
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 150, 0, 150) -- Giảm kích thước
-    Frame.Position = UDim2.new(0.5, -75, 0.5, -75)
+    Frame.Size = UDim2.new(0, 150, 0, 150)
+    Frame.Position = UDim2.new(0, 10, 0, 10) -- Đặt ở góc trên bên trái
     Frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
     Frame.Parent = ScreenGui
     Frame.Active = true
@@ -60,7 +54,7 @@ local function createGUI()
     Title.BackgroundTransparency = 1
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Font = Enum.Font.SourceSansBold
-    Title.TextSize = 16 -- Giảm cỡ chữ
+    Title.TextSize = 16
     Title.Parent = Frame
 
     local FlyButton = Instance.new("TextButton")
@@ -69,7 +63,7 @@ local function createGUI()
     FlyButton.Text = "Toggle Fly: OFF"
     FlyButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
     FlyButton.TextColor3 = Color3.new(1, 1, 1)
-    FlyButton.TextSize = 14 -- Giảm cỡ chữ
+    FlyButton.TextSize = 14
     FlyButton.Parent = Frame
 
     local SpeedLabel = Instance.new("TextLabel")
@@ -78,10 +72,9 @@ local function createGUI()
     SpeedLabel.Text = "Speed: " .. speed
     SpeedLabel.BackgroundTransparency = 1
     SpeedLabel.TextColor3 = Color3.new(1, 1, 1)
-    SpeedLabel.TextSize = 12 -- Giảm cỡ chữ
+    SpeedLabel.TextSize = 12
     SpeedLabel.Parent = Frame
 
-    -- Ô nhập tốc độ
     local SpeedInput = Instance.new("TextBox")
     SpeedInput.Size = UDim2.new(0, 130, 0, 25)
     SpeedInput.Position = UDim2.new(0, 10, 0, 90)
@@ -89,7 +82,7 @@ local function createGUI()
     SpeedInput.PlaceholderText = "Enter speed"
     SpeedInput.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
     SpeedInput.TextColor3 = Color3.new(1, 1, 1)
-    SpeedInput.TextSize = 12 -- Giảm cỡ chữ
+    SpeedInput.TextSize = 12
     SpeedInput.Parent = Frame
 
     local SpeedUpButton = Instance.new("TextButton")
@@ -98,7 +91,7 @@ local function createGUI()
     SpeedUpButton.Text = "Speed +"
     SpeedUpButton.BackgroundColor3 = Color3.new(0, 0.6, 0)
     SpeedUpButton.TextColor3 = Color3.new(1, 1, 1)
-    SpeedUpButton.TextSize = 12 -- Giảm cỡ chữ
+    SpeedUpButton.TextSize = 12
     SpeedUpButton.Parent = Frame
 
     local SpeedDownButton = Instance.new("TextButton")
@@ -107,7 +100,7 @@ local function createGUI()
     SpeedDownButton.Text = "Speed -"
     SpeedDownButton.BackgroundColor3 = Color3.new(0.6, 0, 0)
     SpeedDownButton.TextColor3 = Color3.new(1, 1, 1)
-    SpeedDownButton.TextSize = 12 -- Giảm cỡ chữ
+    SpeedDownButton.TextSize = 12
     SpeedDownButton.Parent = Frame
 
     FlyButton.MouseButton1Click:Connect(function()
@@ -153,4 +146,4 @@ end
 
 createGUI()
 player.CharacterAdded:Connect(onCharacterAdded)
-print("BGrok3 flight script loaded with Shift Lock and camera-based movement!")
+print("BGrok3 flight script loaded with camera-aligned rotation!")
