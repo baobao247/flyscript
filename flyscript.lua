@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local flying = false
-local speed = 50
+local speed = 50 -- Tốc độ mặc định
 
 local function fly(character)
     local humanoid = character:WaitForChild("Humanoid")
@@ -18,12 +18,12 @@ local function fly(character)
 
     while flying and character.Parent do
         local camera = game.Workspace.CurrentCamera
-        local direction = camera.CFrame.LookVector * speed
+        local direction = Vector3.new(0, 0, 0) -- Không di chuyển theo camera
         if humanoid.MoveDirection.Magnitude > 0 then
-            direction = humanoid.MoveDirection * speed
+            direction = humanoid.MoveDirection * speed -- Chỉ di chuyển theo nút
         end
-        bodyVelocity.Velocity = Vector3.new(direction.X, direction.Y, direction.Z)
-        bodyGyro.CFrame = camera.CFrame
+        bodyVelocity.Velocity = direction
+        bodyGyro.CFrame = camera.CFrame -- Giữ hướng nhìn theo camera
         wait()
     end
 
@@ -38,8 +38,8 @@ local function createGUI()
     ScreenGui.ResetOnSpawn = false
 
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 200, 0, 150)
-    Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+    Frame.Size = UDim2.new(0, 200, 0, 200) -- Tăng chiều cao để thêm TextBox
+    Frame.Position = UDim2.new(0.5, -100, 0.5, -100)
     Frame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
     Frame.Parent = ScreenGui
     Frame.Active = true
@@ -71,9 +71,19 @@ local function createGUI()
     SpeedLabel.TextColor3 = Color3.new(1, 1, 1)
     SpeedLabel.Parent = Frame
 
+    -- Ô nhập tốc độ
+    local SpeedInput = Instance.new("TextBox")
+    SpeedInput.Size = UDim2.new(0, 180, 0, 30)
+    SpeedInput.Position = UDim2.new(0, 10, 0, 115)
+    SpeedInput.Text = tostring(speed) -- Giá trị mặc định
+    SpeedInput.PlaceholderText = "Enter speed"
+    SpeedInput.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    SpeedInput.TextColor3 = Color3.new(1, 1, 1)
+    SpeedInput.Parent = Frame
+
     local SpeedUpButton = Instance.new("TextButton")
     SpeedUpButton.Size = UDim2.new(0, 80, 0, 30)
-    SpeedUpButton.Position = UDim2.new(0, 10, 0, 115)
+    SpeedUpButton.Position = UDim2.new(0, 10, 0, 155)
     SpeedUpButton.Text = "Speed +"
     SpeedUpButton.BackgroundColor3 = Color3.new(0, 0.6, 0)
     SpeedUpButton.TextColor3 = Color3.new(1, 1, 1)
@@ -81,7 +91,7 @@ local function createGUI()
 
     local SpeedDownButton = Instance.new("TextButton")
     SpeedDownButton.Size = UDim2.new(0, 80, 0, 30)
-    SpeedDownButton.Position = UDim2.new(0, 100, 0, 115)
+    SpeedDownButton.Position = UDim2.new(0, 100, 0, 155)
     SpeedDownButton.Text = "Speed -"
     SpeedDownButton.BackgroundColor3 = Color3.new(0.6, 0, 0)
     SpeedDownButton.TextColor3 = Color3.new(1, 1, 1)
@@ -98,12 +108,27 @@ local function createGUI()
     SpeedUpButton.MouseButton1Click:Connect(function()
         speed = speed + 10
         SpeedLabel.Text = "Speed: " .. speed
+        SpeedInput.Text = tostring(speed) -- Cập nhật ô nhập
     end)
 
     SpeedDownButton.MouseButton1Click:Connect(function()
         if speed > 10 then
             speed = speed - 10
             SpeedLabel.Text = "Speed: " .. speed
+            SpeedInput.Text = tostring(speed) -- Cập nhật ô nhập
+        end
+    end)
+
+    -- Xử lý khi người chơi nhập tốc độ
+    SpeedInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local input = tonumber(SpeedInput.Text)
+            if input and input >= 0 then
+                speed = input
+                SpeedLabel.Text = "Speed: " .. speed
+            else
+                SpeedInput.Text = tostring(speed) -- Reset nếu nhập sai
+            end
         end
     end)
 end
@@ -116,4 +141,4 @@ end
 
 createGUI()
 player.CharacterAdded:Connect(onCharacterAdded)
-print("BGrok3 flight script loaded!")
+print("BGrok3 flight script loaded with custom speed input!")
